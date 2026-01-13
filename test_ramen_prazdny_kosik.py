@@ -1,5 +1,6 @@
 from playwright.sync_api import Page
 import pytest
+from playwright.sync_api import expect
 
 def test_ramen(page: Page):
     page.goto("https://ramen-brno.cz/")
@@ -17,6 +18,10 @@ def test_ramen(page: Page):
     page.locator(".open-cart-button-desktop").click()
 
     page.get_by_role("button",name="Potvrdit").click()
+
+    kosik_polozky = page.locator(".CartItem_contentRight__uO_MH")
+    expect(kosik_polozky.first).to_be_visible(timeout=5000)
+    assert kosik_polozky.count() > 0
 
     page.locator(".CartItem_contentRight__uO_MH .counter-remove").click()
 
