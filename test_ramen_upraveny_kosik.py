@@ -1,14 +1,10 @@
 from playwright.sync_api import Page
 import pytest
 
-def test_ramen(page: Page):
+def test_ramen(page, auto_accept_cookies):
     page.goto("https://ramen-brno.cz/")
-
-    page.get_by_role("button", name="Přijmout").click()
     
     page.get_by_role("button", name="Navštívit").nth(0).click()
- 
-    page.get_by_role("button", name="Přijmout").click()
 
     page.get_by_role("button", name="PŘIDAT").nth(0).click()
    

@@ -12,11 +12,7 @@ from playwright.sync_api import Page, expect
 def test_ramen(page: Page, jmeno: str, telefon: str, email: str, pocet_chyb: int):
     page.goto("https://ramen-brno.cz/")
 
-    page.get_by_role("button", name="Přijmout").click()
-
     page.get_by_role("button", name="Navštívit").nth(0).click()
-
-    page.get_by_role("button", name="Přijmout").click()
 
     page.get_by_role("button", name="PŘIDAT").nth(0).click()
 
