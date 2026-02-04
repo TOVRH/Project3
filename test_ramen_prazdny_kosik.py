@@ -2,31 +2,16 @@ from playwright.sync_api import Page
 import pytest
 from playwright.sync_api import expect
 
-def test_ramen(page: Page):
-    page.goto("https://ramen-brno.cz/")
+def test_ramen(page: Page, auto_accept_cookies, first_steps, click_when_visible):
+    cart_items = page.locator(".CartItem_contentRight__uO_MH")
+    expect(cart_items.first).to_be_visible(timeout=5000)
+    assert cart_items.count() > 0
 
-    page.get_by_role("button", name="Navštívit").nth(0).click()
+    remove_item = page.locator(".CartItem_contentRight__uO_MH .counter-remove")
+    click_when_visible(remove_item)
 
-    page.get_by_role("button", name="PŘIDAT").nth(0).click()
-
-    page.locator(".styles_isRequired__ORXf6 button").nth(1).click()
-
-    page.locator(".detailed-item-modal .styles_listWrapper__axc40 button").nth(2).click()
-
-    page.get_by_role("button", name="Objednat").click()
-
-    page.locator(".open-cart-button-desktop").click()
-
-    page.get_by_role("button",name="Potvrdit").click()
-
-    kosik_polozky = page.locator(".CartItem_contentRight__uO_MH")
-    expect(kosik_polozky.first).to_be_visible(timeout=5000)
-    assert kosik_polozky.count() > 0
-
-    page.locator(".CartItem_contentRight__uO_MH .counter-remove").click()
-
-    prazdny_kosik = page.locator("text=Položky nevybrány. Zatím jste nic neobjednali")
-    assert prazdny_kosik.is_visible()
+    empty_cart = page.locator("text=Položky nevybrány. Zatím jste nic neobjednali")
+    expect(empty_cart).to_be_visible(timeout=5000)
 
 
 

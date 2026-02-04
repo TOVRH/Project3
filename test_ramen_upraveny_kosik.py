@@ -1,46 +1,54 @@
 from playwright.sync_api import Page
 import pytest
+from playwright.sync_api import expect
 
-def test_ramen(page, auto_accept_cookies):
-    page.goto("https://ramen-brno.cz/")
-    
-    page.get_by_role("button", name="Navštívit").nth(0).click()
+def parse_price(text: str) -> float:
+    return float(text.replace("Kč", "").replace(",", ".").strip())
 
-    page.get_by_role("button", name="PŘIDAT").nth(0).click()
+def test_ramen(page: Page, auto_accept_cookies, first_steps, click_when_visible):
+    upravit_button = page.get_by_role("button",name="Upravit")
+    click_when_visible(upravit_button)
    
-    page.locator(".styles_isRequired__ORXf6 button").nth(0).click()
-
-    page.locator(".detailed-item-modal .styles_listWrapper__axc40 button").nth(2).click()
+    chilli_button = page.locator('div.styles_listWrapper__axc40 div:has-text("CHILLI") button')
+    click_when_visible(chilli_button)
     
-    page.get_by_role("button", name="Objednat").click()
+    vidlicka_button = page.locator('div.styles_listWrapper__axc40 div:has-text("vidlička") button')
+    click_when_visible(vidlicka_button)
     
-    page.locator(".open-cart-button-desktop").click()
-   
-    page.get_by_role("button",name="Potvrdit").click()
-   
-    page.get_by_role("button",name="Upravit").click()
-   
-    page.locator(".styles_isRequired__ORXf6 button").nth(1).click()
+    add_item_button = page.locator(".detailed-item-modal .counter-add")
+    click_when_visible(add_item_button)
     
-    page.locator(".detailed-item-modal .styles_listWrapper__axc40 button").nth(3).click()
+    confirm_button = page.locator(".detailed-item-modal .styles_bottom-container__XbPb0 > button")
+    click_when_visible(confirm_button)
     
-    page.locator(".detailed-item-modal .counter-add").click()
+    vidlicka = page.locator("text=vidlička").first
+    chilli = page.locator("text=CHILLI").first
+    expect(vidlicka).to_be_visible(timeout=5000)
+    expect(chilli).to_be_visible(timeout=5000)
 
-    page.locator(".detailed-item-modal .styles_bottom-container__XbPb0 > button").click()
-
-    vidlicka = page.locator("text=vidlička")
-    chilli = page.locator("text=CHILLI")
-    assert vidlicka.is_visible()
-    assert chilli.is_visible()
-
-    edamame_cena = 76
-    hulky_cena = 1.90
-    vidlicka_cena = 1.90
-    mnozstvi = 2
     
-    ocekavana_cena = (edamame_cena + hulky_cena + vidlicka_cena) * mnozstvi
+    cart_items = page.locator(".check-order-items .check-order-item")
+    expect(cart_items.first).to_be_visible(timeout=10000)
+    total_calculated = 0.0
 
-    cena_text = page.locator("div.CartItem_price__s6QU2").inner_text()
-    cena_ui = float(cena_text.splitlines()[0].replace(" Kč", "").strip())
+    
+    import re
 
-    assert round(cena_ui, 2) == round(ocekavana_cena, 2)
+    for i in range(cart_items.count()):
+        item = cart_items.nth(i)
+
+        price_text = item.locator(".CartItem_price__s6QU2").inner_text()
+        price = parse_price(price_text.splitlines()[0])
+
+        name_text = item.locator('[class^="CartItem_name__"]').inner_text()
+        match = re.search(r"(\d+)\s*×", name_text)
+        qty = int(match.group(1)) if match else 1
+
+        total_calculated += price * qty
+
+    total_ui_locator = page.locator("text=Kč").last
+    expect(total_ui_locator).to_be_visible(timeout=10000)
+    total_ui_text = total_ui_locator.inner_text()
+    total_ui = parse_price(total_ui_text)
+
+    assert round(total_ui, 2) == round(total_calculated, 2)
