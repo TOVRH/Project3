@@ -1,6 +1,7 @@
 from playwright.sync_api import Page
 import pytest
 from playwright.sync_api import expect
+import re
 
 def parse_price(text: str) -> float:
     return float(text.replace("Kč", "").replace(",", ".").strip())
@@ -20,19 +21,15 @@ def test_ramen(page: Page, auto_accept_cookies, first_steps, click_when_visible)
     
     confirm_button = page.locator(".detailed-item-modal .styles_bottom-container__XbPb0 > button")
     click_when_visible(confirm_button)
-    
+
     vidlicka = page.locator("text=vidlička").first
     chilli = page.locator("text=CHILLI").first
     expect(vidlicka).to_be_visible(timeout=5000)
     expect(chilli).to_be_visible(timeout=5000)
 
-    
     cart_items = page.locator(".check-order-items .check-order-item")
     expect(cart_items.first).to_be_visible(timeout=10000)
     total_calculated = 0.0
-
-    
-    import re
 
     for i in range(cart_items.count()):
         item = cart_items.nth(i)
