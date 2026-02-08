@@ -35,9 +35,7 @@ def test_ramen(page: Page, auto_accept_cookies, first_steps, name: str, phone: s
     page.get_by_role("button", name="Potvrdit").click()
     
     if error_count > 0:
-        expect(
-            errors.or_(closed)
-        ).to_be_visible(timeout=5000)
+        expect(errors.or_(closed)).to_be_visible(timeout=5000)
 
         if closed.is_visible():
             expect(closed).to_be_visible()
@@ -46,7 +44,4 @@ def test_ramen(page: Page, auto_accept_cookies, first_steps, name: str, phone: s
         expect(errors).to_have_count(error_count, timeout=5000)
 
     else:
-        expect(
-            page.get_by_text("Způsob platby")
-            .or_(closed)
-        ).to_be_visible (timeout=5000)
+        expect(page.get_by_text("Způsob platby").or_(closed)).to_be_visible (timeout=5000)
