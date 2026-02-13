@@ -12,6 +12,13 @@ def test_ramen(page: Page, auto_accept_cookies, first_steps, click_when_visible)
 
     empty_cart = page.locator("text=Položky nevybrány. Zatím jste nic neobjednali")
     expect(empty_cart).to_be_visible(timeout=5000)
+    expect(cart_items).to_have_count(0)
+
+
+
+
+
+
 
 
 

@@ -9,9 +9,10 @@ from playwright.sync_api import Page, expect
         ]
 )
 
-def test_ramen(page: Page, auto_accept_cookies, first_steps, name: str, phone: str, email: str, error_count: int):
-    page.get_by_role("button",name="Pokračovat").click()
-
+def test_ramen(page: Page, auto_accept_cookies, first_steps, click_when_visible, name: str, phone: str, email: str, error_count: int):
+    pokracovat_button = page.get_by_role("button",name="Pokračovat")
+    click_when_visible(pokracovat_button)
+    
     name_input = page.locator('[data-element="order-customer-info_name-input"]')
     phone_input = page.locator('[data-element="order-customer-info_phone-input"]')
     email_input = page.locator('[data-element="order-customer-info_email-input"]')
@@ -27,7 +28,8 @@ def test_ramen(page: Page, auto_accept_cookies, first_steps, name: str, phone: s
     phone_input.fill(phone)
     email_input.fill(email)
 
-    page.get_by_role("button", name="Potvrdit").click()
+    potvrdit_button = page.get_by_role("button", name="Potvrdit")
+    click_when_visible(potvrdit_button)
 
     if error_count > 0:
         expect(errors).to_have_count(error_count, timeout=5000)
