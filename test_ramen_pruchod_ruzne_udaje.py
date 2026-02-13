@@ -12,17 +12,12 @@ from playwright.sync_api import Page, expect
 def test_ramen(page: Page, auto_accept_cookies, first_steps, name: str, phone: str, email: str, error_count: int):
     page.get_by_role("button",name="Pokračovat").click()
 
-    closed = page.get_by_text("Upozorňujeme, že momentálně neprovozujeme.")
     name_input = page.locator('[data-element="order-customer-info_name-input"]')
     phone_input = page.locator('[data-element="order-customer-info_phone-input"]')
     email_input = page.locator('[data-element="order-customer-info_email-input"]')
     errors = page.locator(".styles_error__PL_mX, .styles_PhoneFieldError__jswNz")
-
-
-    expect(name_input.or_(closed)).to_be_visible(timeout=5000)
-
-    if closed.is_visible():
-        return
+    closed = page.get_by_text("Upozorňujeme, že momentálně neprovozujeme.")
+    payment = page.get_by_text("Způsob platby")
     
     expect(name_input).to_be_visible()
     expect(phone_input).to_be_visible()
@@ -33,15 +28,8 @@ def test_ramen(page: Page, auto_accept_cookies, first_steps, name: str, phone: s
     email_input.fill(email)
 
     page.get_by_role("button", name="Potvrdit").click()
-    
+
     if error_count > 0:
-        expect(errors.or_(closed)).to_be_visible(timeout=5000)
-
-        if closed.is_visible():
-            expect(closed).to_be_visible()
-            return
-
         expect(errors).to_have_count(error_count, timeout=5000)
-
     else:
-        expect(page.get_by_text("Způsob platby").or_(closed)).to_be_visible (timeout=5000)
+        expect(payment.or_(closed)).to_be_visible(timeout=5000)
